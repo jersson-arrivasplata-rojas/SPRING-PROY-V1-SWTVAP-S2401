@@ -1,5 +1,6 @@
 package com.jersson.arrivasplata.swtvap.security;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.jersson.arrivasplata.swtvap.api.auth.services.BlackListService;
 import com.jersson.arrivasplata.swtvap.utils.JwtUtil;
@@ -68,10 +72,23 @@ public class SecurityConfigurer {
         return jwtConverter;
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200")); // Or specify your origins
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*")); // Or specify your headers
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     @SuppressWarnings("deprecation")
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, BlackListService blacklistService) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(new TokenBlacklistFilter(blacklistService), UsernamePasswordAuthenticationFilter.class)
                 .csrf(x -> x.disable())
                 .authorizeRequests(authorize -> authorize

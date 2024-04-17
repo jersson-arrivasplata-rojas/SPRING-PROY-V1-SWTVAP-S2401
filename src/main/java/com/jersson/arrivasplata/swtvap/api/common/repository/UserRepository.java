@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.jersson.arrivasplata.swtvap.api.admin.model.User;
+import com.jersson.arrivasplata.swtvap.api.common.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

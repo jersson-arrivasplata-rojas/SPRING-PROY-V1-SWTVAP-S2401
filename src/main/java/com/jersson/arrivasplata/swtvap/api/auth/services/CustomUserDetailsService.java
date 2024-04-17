@@ -1,7 +1,8 @@
 package com.jersson.arrivasplata.swtvap.api.auth.services;
 
-import com.jersson.arrivasplata.swtvap.api.admin.model.User;
-import com.jersson.arrivasplata.swtvap.api.common.repository.UserRepository;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,8 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.jersson.arrivasplata.swtvap.api.common.model.User;
+import com.jersson.arrivasplata.swtvap.api.common.repository.UserRepository;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

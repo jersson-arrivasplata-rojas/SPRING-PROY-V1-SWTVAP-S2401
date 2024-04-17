@@ -1,5 +1,9 @@
 package com.jersson.arrivasplata.swtvap.api.auth.controllers;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +21,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jersson.arrivasplata.swtvap.api.auth.model.AuthRefreshTokenRequest;
+import com.jersson.arrivasplata.swtvap.api.auth.model.SignUpRequest;
 import com.jersson.arrivasplata.swtvap.api.auth.repository.RoleRepository;
 import com.jersson.arrivasplata.swtvap.api.auth.request.AuthenticationRequest;
 import com.jersson.arrivasplata.swtvap.api.auth.services.BlackListService;
 import com.jersson.arrivasplata.swtvap.api.auth.services.CustomUserDetailsService;
+import com.jersson.arrivasplata.swtvap.api.common.model.Role;
+import com.jersson.arrivasplata.swtvap.api.common.model.User;
 import com.jersson.arrivasplata.swtvap.api.common.repository.UserRepository;
 import com.jersson.arrivasplata.swtvap.utils.JwtUtil;
 
@@ -50,11 +57,11 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationRequest authenticationRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getUsernameOrEmail(), authenticationRequest.getPassword()));
+                authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        userDetailsService.loadUserByUsername(authenticationRequest.getUsernameOrEmail());
+        userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 
         return new ResponseEntity<>(new JwtUtil().generateToken(authentication), HttpStatus.OK);
     }
@@ -86,36 +93,28 @@ public class AuthenticationController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
-    /*
-     * @PostMapping("/register")
-     * public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpDto){
-     * 
-     * // add check for username exists in a DB
-     * if(userRepository.existsByUsername(signUpDto.getUsername())){
-     * return new ResponseEntity<>("Username is already taken!",
-     * HttpStatus.BAD_REQUEST);
-     * }
-     * 
-     * // add check for email exists in DB
-     * if(userRepository.existsByEmail(signUpDto.getEmail())){
-     * return new ResponseEntity<>("Email is already taken!",
-     * HttpStatus.BAD_REQUEST);
-     * }
-     * 
-     * // create user object
-     * User user = new User();
-     * user.setName(signUpDto.getName());
-     * user.setUsername(signUpDto.getUsername());
-     * user.setEmail(signUpDto.getEmail());
-     * user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-     * 
-     * Role roles = roleRepository.findByName("ROLE_ADMIN").get();
-     * user.setRoles(Collections.singleton(roles));
-     * 
-     * userRepository.save(user);
-     * 
-     * return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
-     * 
-     * }
-     */
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpDto){
+        if(userRepository.existsByUsername(signUpDto.getUsername())){
+            return new ResponseEntity<>("Username is already taken!", HttpStatus.BAD_REQUEST);
+        }
+        if(userRepository.existsByEmail(signUpDto.getEmail())){
+            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+        }
+        User user = new User();
+        user.setName(signUpDto.getName());
+        user.setUsername(signUpDto.getUsername());
+        user.setEmail(signUpDto.getEmail());
+        user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
+        Optional<Role> optionalRole = roleRepository.findByName("ROLE_USER");
+        if (optionalRole.isPresent()) {
+            Set<Role> roles = new HashSet<>();
+            roles.add(optionalRole.get());
+            user.setRoles(roles);
+        } else {
+            return new ResponseEntity<>("Role not found", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        userRepository.save(user);
+        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+    }
 }
