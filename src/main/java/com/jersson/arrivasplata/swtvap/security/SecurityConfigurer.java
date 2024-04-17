@@ -19,7 +19,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.jersson.arrivasplata.swtvap.api.auth.services.BlackListService;
 import com.jersson.arrivasplata.swtvap.utils.JwtUtil;
 
 
@@ -66,41 +68,14 @@ public class SecurityConfigurer {
         return jwtConverter;
     }
 
+    @SuppressWarnings("deprecation")
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, BlackListService blacklistService) throws Exception {
         http
+                .addFilterBefore(new TokenBlacklistFilter(blacklistService), UsernamePasswordAuthenticationFilter.class)
                 .csrf(x -> x.disable())
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
-                        .requestMatchers("/api/newsletter-subscriptions/**").hasRole("ADMIN")
-                        .requestMatchers("/api/marketing-campaigns/**").hasRole("ADMIN")
-                        .requestMatchers("/api/cart-details/**").hasRole("ADMIN")
-                        .requestMatchers("/api/carts/**").hasRole("ADMIN")
-                        .requestMatchers("/api/units/**").hasRole("ADMIN")
-                        .requestMatchers("/api/categories/**").hasRole("ADMIN")
-                        .requestMatchers("/api/category-catalogs/**").hasRole("ADMIN")
-                        .requestMatchers("/api/catalogs/**").hasRole("ADMIN")
-                        .requestMatchers("/api/dispatches/**").hasRole("ADMIN")
-                        .requestMatchers("/api/orders-amounts/**").hasRole("ADMIN")
-                        .requestMatchers("/api/orders/**").hasRole("ADMIN")
-                        .requestMatchers("/api/orders-details/**").hasRole("ADMIN")
-                        .requestMatchers("/api/orders-transactions/**").hasRole("ADMIN")
-                        .requestMatchers("/api/product-discounts/**").hasRole("ADMIN")
-                        .requestMatchers("/api/product-catalogs/**").hasRole("ADMIN")
-                        .requestMatchers("/api/product-categories/**").hasRole("ADMIN")
-                        .requestMatchers("/api/products/**").hasRole("ADMIN")
-                        .requestMatchers("/api/product-images/**").hasRole("ADMIN")
-                        .requestMatchers("/api/product-parameters/**").hasRole("ADMIN")
-                        .requestMatchers("/api/product-providers/**").hasRole("ADMIN")
-                        .requestMatchers("/api/product-units/**").hasRole("ADMIN")
-                        .requestMatchers("/api/clients/**").hasRole("ADMIN")
-                        .requestMatchers("/api/providers/**").hasRole("ADMIN")
-                        .requestMatchers("/api/comments/**").hasRole("ADMIN")
-                        .requestMatchers("/api/contacts/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reviews/**").hasRole("ADMIN")
-                        .requestMatchers("/api/parameters/**").hasRole("ADMIN")
                         .requestMatchers("/api/w-analytics/**").permitAll()
                         .requestMatchers("/api/w-catalogs/**").permitAll()
                         .requestMatchers("/api/w-categories/**").permitAll()

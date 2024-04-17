@@ -1,37 +1,34 @@
 package com.jersson.arrivasplata.swtvap.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
-import lombok.Builder;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.converter.Converter;
+import java.security.Key;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.time.Instant;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import com.jersson.arrivasplata.swtvap.api.auth.model.AuthResponse;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.annotation.PostConstruct;
 
 public class JwtUtil {
 
@@ -51,7 +48,7 @@ public class JwtUtil {
         return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
-    public String generateToken(Authentication authentication) {
+    public AuthResponse generateToken(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
 
 
@@ -71,12 +68,13 @@ public class JwtUtil {
         claims.put("exp", expInstant.getEpochSecond()); // convert to seconds
 
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(Date.from(iatInstant))
                 .setExpiration(Date.from(expInstant))
                 .signWith(SignatureAlgorithm.HS256, getSecretKey())
                 .compact();
+        return new AuthResponse(token, (int) EXPIRATION_TIME / 1000, 0, token, "Bearer", "id_token", 0, "session_state", "openid");
     }
 
     public Claims extractAllClaims(String token) {
@@ -141,4 +139,19 @@ public class JwtUtil {
         return jwtDecoder;
     }
 
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                .setSigningKey(getSecretKey())
+                .build()
+                .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            System.out.println("Invalid token: " + e.getMessage());
+            return false;
+        }
+    }
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
 }

@@ -1,14 +1,13 @@
 package com.jersson.arrivasplata.swtvap.api.common.repository;
 
-import com.jersson.arrivasplata.swtvap.api.admin.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.jersson.arrivasplata.swtvap.api.admin.model.User;
+
 @Repository
-@EnableJpaRepositories(basePackages = "com.jersson.arrivasplata.swtvap.api.admin.repository")
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Optional<User> findByUsernameOrEmail(String username, String email);
