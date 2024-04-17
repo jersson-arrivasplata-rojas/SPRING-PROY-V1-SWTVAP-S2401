@@ -1,11 +1,9 @@
 package com.jersson.arrivasplata.swtvap;
 
-import com.jersson.arrivasplata.swtvap.utils.SecretKeyGenerator;
-import com.jersson.arrivasplata.swtvap.utils.ValidateToken;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+
+import com.jersson.arrivasplata.swtvap.utils.SecretKeyGenerator;
 
 @SpringBootApplication
 public class SwtvapApplication {
