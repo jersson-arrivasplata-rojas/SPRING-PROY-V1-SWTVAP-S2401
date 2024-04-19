@@ -1,5 +1,6 @@
 package com.jersson.arrivasplata.swtvap.security;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +28,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.jersson.arrivasplata.swtvap.api.auth.services.BlackListService;
 import com.jersson.arrivasplata.swtvap.utils.JwtUtil;
-
 
 @Configuration
 @EnableMethodSecurity
@@ -74,8 +74,17 @@ public class SecurityConfigurer {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        List<String> allowedOrigins = new ArrayList<>(Arrays.asList(
+        "http://localhost",
+            "https://localhost",
+            "http://209.38.134.10",
+            "https://209.38.134.10",
+            "http://chascaperuart.com",
+            "https://chascaperuart.com"
+        ));
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://209.38.134.10:4200", "https://209.38.134.10:4200")); // Or specify your origins
+        configuration.setAllowedOrigins(allowedOrigins); // Or specify your origins
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*")); // Or specify your headers
         configuration.setAllowCredentials(true);
@@ -103,14 +112,12 @@ public class SecurityConfigurer {
                         .requestMatchers("/api/w-parameters/**").permitAll()
                         .requestMatchers("/api/w-products/**").permitAll()
                         .requestMatchers("/api/w-reviews/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(x -> x.jwt(jwt -> jwt.decoder(jwtDecoder())
                         .jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
     }
-
 
 }

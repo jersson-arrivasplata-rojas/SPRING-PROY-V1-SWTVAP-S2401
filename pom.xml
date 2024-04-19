@@ -133,6 +133,12 @@
 			<version>1.5.0.Beta2</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- AWS Java SDK for S3 -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.12.131</version>
+		</dependency>
 	</dependencies>
 
 	<build>
