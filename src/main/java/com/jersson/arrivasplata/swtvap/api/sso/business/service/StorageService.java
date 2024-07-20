@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface StorageService {
-    void uploadFile(String keyName, MultipartFile uploadFilePath);
+    void uploadFile(String keyName, String folderName, MultipartFile uploadFilePath);
 
-    void updateFile(String keyName, MultipartFile newFile);
+    void updateFile(String keyName, String folderName, MultipartFile newFile);
 
-    void removeFile(String keyName);
+    void removeFile(String keyName, String folderName);
 
-    List<String> listFiles();
+    List<String> listFiles(String folderName);
+
+    void downloadFile(String keyName, String folderName, String localFilePath);
 }

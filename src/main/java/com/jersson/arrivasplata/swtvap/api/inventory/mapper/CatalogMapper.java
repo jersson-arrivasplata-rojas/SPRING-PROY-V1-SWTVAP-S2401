@@ -4,6 +4,7 @@ import com.jersson.arrivasplata.swtvap.api.common.model.Catalog;
 import com.jersson.arrivasplata.swtvap.api.common.model.CatalogRequest;
 import com.jersson.arrivasplata.swtvap.api.common.model.CatalogResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -12,7 +13,8 @@ import java.util.List;
 public interface CatalogMapper {
     CatalogMapper INSTANCE = Mappers.getMapper(CatalogMapper.class);
 
-    //@Mapping(target = "id", ignore = true)
+    @Mapping(target = "descriptionEn")
+    @Mapping(target = "nameEn")
     Catalog catalogRequestToCatalog(CatalogRequest catalogRequest);
 
     CatalogRequest catalogToCatalogRequest(Catalog catalog);

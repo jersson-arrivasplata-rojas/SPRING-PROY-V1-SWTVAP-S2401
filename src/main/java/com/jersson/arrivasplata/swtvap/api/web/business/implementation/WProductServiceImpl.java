@@ -49,4 +49,19 @@ public class WProductServiceImpl implements WProductService {
                     return Mono.just(productFilter);
                 });
     }
+
+    public Mono<WProduct> getProductByPath(String path) {
+        WProduct product = WProductRepository.findByPathAndStatusAndDeletedAtIsNull(path, Status.ACTIVE);
+
+        return Mono.just(product)
+                .flatMap(response -> {
+                    if (response == null) {
+                        return Mono.error(new CustomException("Product not found with name: " + path));
+                    }
+
+                    WProduct productFilter = Common.builder().build().filterProduct(response);
+
+                    return Mono.just(productFilter);
+                });
+    }
 }

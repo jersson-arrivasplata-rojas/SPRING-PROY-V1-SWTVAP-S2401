@@ -8,4 +8,5 @@ import reactor.core.publisher.Mono;
 public interface WProductService {
     Flux<WProduct> getAllProducts();
     Mono<WProduct> getProductByName(String name, String lang);
+    Mono<WProduct> getProductByPath(String path);
 }

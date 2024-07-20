@@ -51,7 +51,7 @@ public class OrderDetail {
     private String otherDetails;
 
     @Column(name = "otherDetails_en", columnDefinition = "TEXT")
-    private String otherDetails_en;
+    private String otherDetailsEn;
 
     @Enumerated(EnumType.ORDINAL)
     private Status status;

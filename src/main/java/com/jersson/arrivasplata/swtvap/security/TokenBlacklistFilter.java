@@ -46,7 +46,8 @@ public class TokenBlacklistFilter extends OncePerRequestFilter {
             "/api/comments/**",
             "/api/contacts/**",
             "/api/reviews/**",
-            "/api/parameters/**"
+            "/api/parameters/**",
+            "/api/storages/**"
     };
 
     public TokenBlacklistFilter(BlackListService blacklistService) {

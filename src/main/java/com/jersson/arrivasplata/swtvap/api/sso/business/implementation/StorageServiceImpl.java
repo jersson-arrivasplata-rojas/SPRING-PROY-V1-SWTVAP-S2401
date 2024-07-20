@@ -1,11 +1,14 @@
 package com.jersson.arrivasplata.swtvap.api.sso.business.implementation;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.amazonaws.services.s3.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,75 +17,96 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.jersson.arrivasplata.swtvap.api.sso.business.service.StorageService;
+import com.jersson.arrivasplata.swtvap.api.sso.config.SOSConfig;
 
 @Service
 public class StorageServiceImpl implements StorageService {
 
     private AmazonS3 s3Client;
 
-    @Value("${cloud.aws.credentials.access-key}")
-    private String accessKey;
+    private SOSConfig config;
 
-    @Value("${cloud.aws.credentials.secret-key}")
-    private String secretKey;
+    @Autowired
+    public StorageServiceImpl(SOSConfig config) {
+        this.config = config;
 
-    @Value("${cloud.aws.region.static}")
-    private String region;
-
-    @Value("${s3.bucket}")
-    private String bucketName;
-
-    @Value("${s3.endpoint}")
-    private String bucketEndpoint;
-
-    public StorageServiceImpl() {
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials(config.getAccessKey(), config.getSecretKey());
         this.s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                 .withEndpointConfiguration(
-                        new AwsClientBuilder.EndpointConfiguration(bucketEndpoint, region))
+                        new AwsClientBuilder.EndpointConfiguration(config.getBucketEndpoint(), config.getRegion()))
                 .build();
     }
 
-    public void uploadFile(String keyName, MultipartFile uploadFilePath) {
+    public void uploadFile(String keyName, String folderName, MultipartFile uploadFilePath) {
+        File file = null;
+        String fullKeyName = folderName + "/" + keyName;
         try {
-            // Create a temporary file and copy the multipart file content into it
-            File file = File.createTempFile("temp", null);
+            file = File.createTempFile("temp", null);
             uploadFilePath.transferTo(file);
 
-            // Upload the file to S3
-            s3Client.putObject(new PutObjectRequest(bucketName, keyName, file));
+            // Crear una solicitud de put con la configuración de ACL pública
+            PutObjectRequest putObjectRequest = new PutObjectRequest(config.getBucketName(), fullKeyName, file)
+                    .withCannedAcl(CannedAccessControlList.PublicRead);
 
-            // Delete the temporary file
+            s3Client.putObject(putObjectRequest);
             file.delete();
         } catch (IOException e) {
-            // Handle the exception
-            e.printStackTrace();
+            throw new RuntimeException("Failed to upload file", e);
+        } finally {
+            // Ensure temporary file is deleted if an exception occurs
+            if (file != null) {
+                file.deleteOnExit();
+            }
         }
-
     }
 
-    public void updateFile(String keyName, MultipartFile newFile) {
+    public void updateFile(String keyName, String folderName, MultipartFile newFile) {
         // To update a file, we simply upload a new file with the same key
-        uploadFile(keyName, newFile);
+        uploadFile(keyName, folderName, newFile);
     }
 
-    public void removeFile(String keyName) {
-        this.s3Client.deleteObject(new DeleteObjectRequest(bucketName, keyName));
+    public void removeFile(String keyName, String folderName) {
+        String fullKeyName = folderName + "/" + keyName;
+        s3Client.deleteObject(new DeleteObjectRequest(config.getBucketName(), fullKeyName));
     }
 
-    public List<String> listFiles() {
-        List<String> keys = new ArrayList<>();
-        ObjectListing objects = s3Client.listObjects(bucketName);
-        for (S3ObjectSummary objectSummary : objects.getObjectSummaries()) {
-            keys.add(objectSummary.getKey());
+    public List<String> listFiles(String folderName) {
+        ListObjectsV2Request req = new ListObjectsV2Request()
+        .withBucketName(config.getBucketName())
+        .withPrefix(folderName + "/")
+        .withDelimiter("/");
+
+    
+        ListObjectsV2Result result = s3Client.listObjectsV2(req);
+    
+        return result.getObjectSummaries().stream()
+            .map(S3ObjectSummary::getKey)
+            .collect(Collectors.toList());
+    }
+    
+    public void downloadFile(String keyName, String folderName, String localFilePath) {
+        String fullKeyName = folderName + "/" + keyName;
+        try {
+            // Descargar el objeto desde Amazon S3
+            S3Object object = s3Client.getObject(config.getBucketName(), fullKeyName);
+            S3ObjectInputStream inputStream = object.getObjectContent();
+
+            // Escribir el contenido del objeto en un archivo local
+            try (OutputStream outputStream = new FileOutputStream(localFilePath)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+            } finally {
+                inputStream.close();
+            }
+            
+            System.out.println("Archivo descargado con éxito a: " + localFilePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to download file", e);
         }
-        return keys;
     }
-    // Métodos adicionales para descargar y eliminar archivos, etc.
 }

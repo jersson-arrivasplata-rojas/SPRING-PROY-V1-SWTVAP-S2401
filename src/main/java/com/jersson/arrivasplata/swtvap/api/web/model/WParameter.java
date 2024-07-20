@@ -2,6 +2,7 @@ package com.jersson.arrivasplata.swtvap.api.web.model;
 
 import com.jersson.arrivasplata.swtvap.api.web.enums.Status;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 @Data
 @Entity
+@AllArgsConstructor
 @Table(name = "swtvap_parameters")
 public class WParameter {
     @Id

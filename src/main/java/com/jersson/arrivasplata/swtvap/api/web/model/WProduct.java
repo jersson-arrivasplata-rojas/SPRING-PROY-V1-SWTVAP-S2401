@@ -30,6 +30,8 @@ public class WProduct {
     @Column(name = "code", length = 50)
     private String code;
 
+    @Column(name = "path", columnDefinition = "TEXT")
+    private String path;
     @Column(name = "name", length = 200)
     private String name;
 

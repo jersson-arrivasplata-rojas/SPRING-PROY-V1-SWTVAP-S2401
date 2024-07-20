@@ -10,4 +10,7 @@ public interface WProductRepository extends JpaRepository<WProduct,Long> {
     WProduct findByNameAndStatusAndDeletedAtIsNull(String name, Status status);
 
     WProduct findByNameEnAndStatusAndDeletedAtIsNull(String name, Status status);
+
+    WProduct findByPathAndStatusAndDeletedAtIsNull(String path, Status status);
+
 }

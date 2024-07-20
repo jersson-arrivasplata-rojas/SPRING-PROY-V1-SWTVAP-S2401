@@ -20,5 +20,10 @@ public interface WProductMapper {
     @Mapping(target = "images", expression = "java(new ArrayList<>(product.getProductImages()))")
     @Mapping(target = "units", expression = "java(new ArrayList<>(product.getUnits()))")
     @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "otherDetailsEn")
+    @Mapping(target = "descriptionEn")
+    @Mapping(target = "nameEn")
+    @Mapping(target = "path")
+    @Mapping(target = "name")
     WProductResponse productToProductResponse(WProduct product);
 }

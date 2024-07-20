@@ -41,4 +41,14 @@ public class WProductControllerImpl implements WProductController {
                     return productResponse;
                 });
     }
+
+    @GetMapping("/path/{path}")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<WProductResponse> getProductByPath(@PathVariable String path) {
+        return productService.getProductByPath(path)
+                .map(product -> {
+                    WProductResponse productResponse = productMapper.productToProductResponse(product);
+                    return productResponse;
+                });
+    }
 }

@@ -12,8 +12,8 @@ public class CategoryRequest {
     private Long categoryId;
     private String name;
     private String description;
-    private String name_en;
-    private String description_en;
+    private String nameEn;
+    private String descriptionEn;
     private Status status;
     private LocalDate deletedAt;
 }

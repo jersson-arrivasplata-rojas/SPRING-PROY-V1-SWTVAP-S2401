@@ -75,12 +75,22 @@ public class SecurityConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         List<String> allowedOrigins = new ArrayList<>(Arrays.asList(
-        "http://localhost",
-            "https://localhost",
-            "http://209.38.134.10",
-            "https://209.38.134.10",
-            "http://chascaperuart.com",
-            "https://chascaperuart.com"
+                "http://localhost:4200/#/",
+                "https://localhost:4200/#/",
+                "http://localhost/#/",
+                "https://localhost/#/",
+                "http://209.38.134.10/#/",
+                "https://209.38.134.10/#/",
+                "http://chascaperuart.com/#/",
+                "https://chascaperuart.com/#/",
+                "http://localhost:4200",
+                "https://localhost:4200",
+                "http://localhost",
+                "https://localhost",
+                "http://209.38.134.10",
+                "https://209.38.134.10",
+                "http://chascaperuart.com",
+                "https://chascaperuart.com"
         ));
 
         CorsConfiguration configuration = new CorsConfiguration();
@@ -112,6 +122,9 @@ public class SecurityConfigurer {
                         .requestMatchers("/api/w-parameters/**").permitAll()
                         .requestMatchers("/api/w-products/**").permitAll()
                         .requestMatchers("/api/w-reviews/**").permitAll()
+                        .requestMatchers("/swtvap/**").permitAll()
+                        .requestMatchers("/swtvap-api-product/v3/api-docs").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(x -> x.jwt(jwt -> jwt.decoder(jwtDecoder())

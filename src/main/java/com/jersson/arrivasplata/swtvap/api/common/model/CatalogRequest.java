@@ -14,8 +14,8 @@ public class CatalogRequest {
     private String code;
     private String name;
     private String description;
-    private String name_en;
-    private String description_en;
+    private String nameEn;
+    private String descriptionEn;
     private StatusCatalog status;
     private Lang lang;
     private LocalDate deletedAt;
